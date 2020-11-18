@@ -1,9 +1,15 @@
 package com.petstore.data.model;
 
+
+
+import lombok.Data;
+import lombok.ToString;
+
 import javax.persistence.*;
 
 
 @Entity
+@Data
 public class Pet {
 
     @Id
@@ -14,12 +20,18 @@ public class Pet {
     private String name;
 
     private Integer age;
+
     private String color;
 
+    @Column
+    private String breed;
 
+    @Enumerated(EnumType.STRING)
     private Gender petSex;
 
-    @Column(unique = true)
-    private String breed;
+
+    @ManyToOne(cascade = CascadeType.PERSIST)
+    @ToString.Exclude
+    private Store store;
 
 }
