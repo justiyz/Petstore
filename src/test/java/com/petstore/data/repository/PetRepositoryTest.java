@@ -174,7 +174,7 @@ class PetRepositoryTest {
         //check if pet exists
         boolean sally = petRepository.existsById(35);
 
-        //assert that pet exist
+        //assert that pet exists
         assertThat(sally).isTrue();
 
         //delete pet
