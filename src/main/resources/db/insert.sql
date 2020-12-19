@@ -13,13 +13,13 @@ VALUES (1, 'our store', 'Lagos', '090890'),
 
 
 INSERT into pet(`id`, `name`, `color`, `breed`, `age`, `pet_sex`, `store_id`)
-VALUES (31, 'jill', 'blue', 'parrot', 6, 'MALE', 21),
-(32, 'jack', 'pink', 'dog', 2, 'FEMALE', 21),
-(33, 'sally', 'white', 'goat', 3, 'MALE', 21),
-(34, 'milly', 'brown', 'rabbit', 4, 'FEMALE', 21),
-(35, 'ross', 'green', 'cow', 5, 'MALE', 21),
-(36, 'john', 'black', 'parrot', 6, 'FEMALE', 21),
-(37, 'john', 'rose-gold', 'sheep', 7, 'MALE', 21);
+VALUES (31, 'jill', 'blue', 'parrot', 6, 'MALE', 1),
+(32, 'jack', 'pink', 'dog', 2, 'FEMALE', 2),
+(33, 'sally', 'white', 'goat', 3, 'MALE', 3),
+(34, 'milly', 'brown', 'rabbit', 4, 'FEMALE', 1),
+(35, 'ross', 'green', 'cow', 5, 'MALE', 4),
+(36, 'john', 'black', 'parrot', 6, 'FEMALE', 5),
+(37, 'john', 'rose-gold', 'sheep', 7, 'MALE', 4);
 
 SET FOREIGN_KEY_CHECKS = 1;
 

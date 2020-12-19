@@ -10,7 +10,7 @@ import java.util.List;
 @Data
 public class Store {
 
-    @Id //
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private  Integer id;
 
@@ -20,7 +20,7 @@ public class Store {
 
     private String contactNo;
 
-    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "store", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Pet> petList;
 
     public void addPets(Pet pet){

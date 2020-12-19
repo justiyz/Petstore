@@ -13,7 +13,7 @@ import org.springframework.test.web.servlet.MockMvc;
 
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -24,6 +24,9 @@ class PetRestControllerTest {
 
     @Autowired
     private MockMvc mockMvc;
+
+    ObjectMapper mapper = new ObjectMapper();
+
 
     @BeforeEach
     void setUp() {
@@ -39,7 +42,7 @@ class PetRestControllerTest {
         pet.setBreed("Cat");
         pet.setAge(7);
 
-        ObjectMapper mapper = new ObjectMapper();
+
 
         this.mockMvc.perform(post("/pet/create")
                     .contentType("application/json")
@@ -50,4 +53,33 @@ class PetRestControllerTest {
 
 
     }
+
+    @Test
+    void whenICallTheGetPetsMethod_thenCreateAPetObject() throws Exception{
+
+        this.mockMvc.perform(get("/pet/all"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+        }
+
+
+    @Test
+    void whenICallTheFindMethod_thenReturnPetObject() throws Exception{
+
+        this.mockMvc.perform(get("/pet/one/31"))
+                    .andDo(print())
+                    .andExpect(status().isOk())
+                    .andReturn();
+    }
+
+    @Test
+    void whenICallTheDeletePet_thenReturnPetObject() throws Exception{
+
+        this.mockMvc.perform(delete("/pet/one/31"))
+                .andDo(print())
+                .andExpect(status().isOk())
+                .andReturn();
+    }
+
 }

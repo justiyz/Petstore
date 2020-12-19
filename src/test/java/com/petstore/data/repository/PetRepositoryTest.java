@@ -3,6 +3,7 @@ package com.petstore.data.repository;
 import com.petstore.data.model.Gender;
 import com.petstore.data.model.Pet;
 import com.petstore.data.model.Store;
+import com.petstore.web.exceptions.PetDoesNotExistException;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -14,13 +15,12 @@ import org.springframework.test.context.jdbc.Sql;
 import javax.transaction.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
 
-@Sql(scripts = {"classpath:db/insert.sql"}) //runs db file from the path
+@Sql(scripts = {"classpath:db/insert.sql"})
 @Slf4j
 @SpringBootTest
 class PetRepositoryTest {
@@ -36,27 +36,11 @@ class PetRepositoryTest {
     }
 
     @Test
-    public void whenPetIsSaved_thenReturnAPetId(){
-        Pet pet = new Pet();
-        pet.setName("Jack");
-        pet.setAge(2);
-        pet.setBreed("Dog");
-        pet.setColor("Black");
-        pet.setPetSex(Gender.MALE);
-
-        //call repository save method
-        petRepository.save(pet);
-
-        assertThat(pet.getId()).isNotNull();
-        log.info("pet instance after adding --> {}", pet);
-    }
-
-    @Test
-    @Rollback(value = false) //removes the result, value = false keeps the result of saved transaction
-    @Transactional //allows multiple operations with the db, keep transaction open
+    @Rollback(value = false)
+    @Transactional
     public void whenStoreIsMappedToPet_thenForeignKeyIsPresent(){
         //cascading allows us to save a parent and a child for just an instance(save both pet and store)
-        //create pet
+
         Pet pet = new Pet();
         pet.setName("Jack");
         pet.setAge(2);
@@ -64,10 +48,8 @@ class PetRepositoryTest {
         pet.setColor("Black");
         pet.setPetSex(Gender.MALE);
 
-        //call repository save method
-        log.info("pet instance after adding --> {}", pet);
+        log.info("pet instance before adding --> {}", pet);
 
-        //create store
         Store store = new Store();
         store.setName("Pet Sellers");
         store.setLocation("Yaba");
@@ -75,29 +57,48 @@ class PetRepositoryTest {
 
         pet.setStore(store);
 
-        //map to store
         petRepository.save(pet);
 
         log.info("Pet instance after adding --> {}", pet);
         log.info("Store instance after adding --> {}", store);
 
-        //assert
         assertThat(pet.getId()).isNotNull();
         assertThat(store.getId()).isNotNull();
         assertThat(pet.getStore()).isNotNull();
     }
+
+
+    @Test
+    @Rollback(value = false)
+    @Transactional
+    void mapANewPetToAnExistingStore(){
+
+        Store store = storeRepository.findById(5).orElse(null);
+        assertNotNull(store);
+
+        Pet pet = new Pet();
+        pet.setName("JAYBACK");
+        pet.setAge(4);
+        pet.setBreed("Rabbit");
+        pet.setColor("Blue");
+        pet.setPetSex(Gender.FEMALE);
+        pet.setStore(store);
+        petRepository.save(pet);
+
+        assertThat(pet.getId()).isNotNull();
+    }
+
+
     @Test
     @Transactional
     @Rollback(value = false)
-    public void whenIAddPetsToAStore_thenICanFetchAListOfAListOfPetsFromStore(){
+    public void whenIAddPetsToAStore_thenICanFetchAListOfPetsFromStore(){
 
-        //create store
         Store store = new Store();
         store.setName("Pet Sellers");
         store.setLocation("Yaba");
         store.setContactNo("09099887766");
 
-        //create 2 pets
         Pet jack = new Pet();
         jack.setName("Jack");
         jack.setAge(5);
@@ -119,69 +120,67 @@ class PetRepositoryTest {
         store.addPets(jack);
         store.addPets(sally);
 
-        //save store
         storeRepository.save(store);
 
         log.info("Store instance after saving --> {}", store);
 
-        //assert for pet id
         assertThat(jack.getId()).isNotNull();
 
-        //assert for store id
         assertThat(sally.getId()).isNotNull();
 
-        //assert that store has pet
         assertThat(store.getPetList());
 
     }
 
+
     @Test
     public void whenFindAllPetIsCalled_thenReturnAllPetsInStore(){
 
-        //find pets from store
         List<Pet> savedPets = petRepository.findAll();
-        assertThat(savedPets).isNotEmpty();
+        log.info("Pets list --> {}", savedPets);
+        assertThat(savedPets).isNotNull() ;
         assertThat(savedPets.size()).isEqualTo(7);
 
-
-        //assert that pets exists
     }
 
     @Test
     public void updateExistingPetDetailsTest(){
-        //fetch a pet
-      Pet sally = petRepository.findById(34).orElse(null);
 
-        //assert the field
+      Pet sally = petRepository.findById(34).orElse(null);
         assertThat(sally).isNotNull();
         assertThat(sally.getColor()).isEqualTo("brown");
 
-        //update pet field
         sally.setColor("purple");
 
-        //save pet
         petRepository.save(sally);
 
         log.info("After updating pet object --> {}", sally);
-
-        //assert that update field had changed
         assertThat(sally.getColor()).isEqualTo("purple");
     }
 
 
     @Test
-    public void whenIdeletePetFromDatabase_thenPetIsDeleted(){
-        //check if pet exists
+    public void whenIDeletePetFromDatabase_thenPetIsDeleted(){
+
         boolean sally = petRepository.existsById(35);
 
-        //assert that pet exists
         assertThat(sally).isTrue();
 
-        //delete pet
         petRepository.deleteById(35);
-
-        //check if pet exists
         assertThat(petRepository.existsById(35)).isFalse();
+
+    }
+
+    @Test
+    public void whenIDeletePetFromDatabaseAndPetDoesntExist_thenPetIsNotDeleted(){
+        try {
+            assertThat(petRepository.existsById(35)).isTrue();
+            petRepository.deleteById(35);
+            assertThat(petRepository.existsById(35)).isFalse();
+        } catch (Exception ex){
+            log.info("Pet doesnt not exist exception was thrown --> {}", ex.getMessage());
+        }
+
 
     }
 

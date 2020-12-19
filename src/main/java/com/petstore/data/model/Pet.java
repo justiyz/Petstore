@@ -1,15 +1,13 @@
 package com.petstore.data.model;
 
-
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 import lombok.ToString;
-
 import javax.persistence.*;
 
 
-@Entity //to create a table in the db with the attributes
-@Data //to add all fields of the attributes i.e setters, getters, constructors, toString etc.
+@Entity
+@Data
 public class Pet {
 
     @Id
@@ -19,6 +17,7 @@ public class Pet {
     @Column(nullable = false)
     private String name;
 
+
     private Integer age;
 
     private String color;
@@ -26,12 +25,13 @@ public class Pet {
     @Column
     private String breed;
 
-    @Enumerated(EnumType.STRING) //to indicate in the db that this attribute is an ENUM type
+    @Enumerated(EnumType.STRING)
     private Gender petSex;
 
 
     @ManyToOne(cascade = CascadeType.PERSIST)
-    @ToString.Exclude //this tells the jvm not to output the toString method of the class Store.
+    @ToString.Exclude
+    @JsonIgnore
     private Store store;
 
 }
